@@ -9,6 +9,8 @@ interface MockInterviewChatProps {
   isLoading: boolean;
   onEndSession: () => void;
   topicName: string;
+  isWaitingForNext: boolean;
+  onNextQuestion: () => void;
 }
 
 const MockInterviewChat: React.FC<MockInterviewChatProps> = ({
@@ -17,6 +19,8 @@ const MockInterviewChat: React.FC<MockInterviewChatProps> = ({
   isLoading,
   onEndSession,
   topicName,
+  isWaitingForNext,
+  onNextQuestion,
 }) => {
   const [currentMessage, setCurrentMessage] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -63,7 +67,7 @@ const MockInterviewChat: React.FC<MockInterviewChatProps> = ({
               </div>
             </div>
           ))}
-          {isLoading && (
+          {isLoading && !isWaitingForNext && (
             <div className="flex justify-start">
               <div className="max-w-prose px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-200">
                 <LoadingSpinner text="Typing..." />
@@ -75,19 +79,27 @@ const MockInterviewChat: React.FC<MockInterviewChatProps> = ({
       </div>
 
       <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-        <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
-          <input
-            type="text"
-            value={currentMessage}
-            onChange={(e) => setCurrentMessage(e.target.value)}
-            placeholder="Type your answer..."
-            className="flex-1 p-3 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
-            disabled={isLoading}
-          />
-          <Button type="submit" disabled={isLoading || !currentMessage.trim()}>
-            {isLoading ? <LoadingSpinner isButton={true} /> : 'Send'}
-          </Button>
-        </form>
+        {isWaitingForNext ? (
+          <div className="flex justify-center">
+            <Button onClick={onNextQuestion} disabled={isLoading}>
+              Next Question &rarr;
+            </Button>
+          </div>
+        ) : (
+          <form onSubmit={handleSendMessage} className="flex items-center space-x-2">
+            <input
+              type="text"
+              value={currentMessage}
+              onChange={(e) => setCurrentMessage(e.target.value)}
+              placeholder="Type your answer..."
+              className="flex-1 p-3 border border-slate-300 dark:border-slate-600 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-200"
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading || !currentMessage.trim()}>
+              {isLoading ? <LoadingSpinner isButton={true} /> : 'Send'}
+            </Button>
+          </form>
+        )}
       </div>
     </div>
   );

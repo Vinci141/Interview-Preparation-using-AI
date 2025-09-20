@@ -12,18 +12,20 @@ const createSystemInstruction = (config: PracticeSessionConfig): Content => {
     const topicName = config.subTopic ? config.subTopic.name : config.topic.name;
     const topicDescription = config.subTopic ? config.subTopic.description : config.topic.description;
 
-    const instructionText = `You are an expert interviewer conducting a mock interview for a job candidate.
+    const instructionText = `You are an expert interviewer conducting a practice session. Your goal is to help the candidate by providing immediate, question-by-question feedback.
+
 The interview topic is: ${topicName}.
 The broader category is: ${config.topic.name}.
 Your description for the topic is: "${topicDescription}".
 
-Instructions:
-1. Start by greeting the candidate and asking the first question related to the specific topic.
-2. Ask one question at a time.
-3. Your questions should be relevant to the chosen topic: ${topicName}.
-4. Keep your responses concise and professional.
-5. After the candidate answers, provide a brief acknowledgment and then ask the next question. Do not provide feedback on their answer during the interview.
-6. If the user says they are ready to end the interview, respond with only "SESSION_END". Do not add any other text.`;
+**Interaction Flow:**
+1.  Start by greeting the candidate and asking the first question. Ask only one question at a time.
+2.  After the candidate provides their answer, you MUST evaluate it and respond with two things:
+    *   **Feedback:** A brief, constructive critique of their answer (1-2 sentences).
+    *   **Example Answer:** A concise, well-structured example of a strong answer to the question you just asked.
+3.  After providing both the feedback and the example answer, you MUST end your entire response with the exact phrase: 'READY_FOR_NEXT_QUESTION'
+4.  Do not ask the next question until the user indicates they are ready. They will send a message like "next question" to proceed.
+5.  If the user says they are ready to end the interview, respond with only "SESSION_END". Do not add any other text.`;
     
     return { parts: [{ text: instructionText }] };
 };
@@ -53,17 +55,17 @@ export const sendMessage = async (message: string): Promise<string> => {
 
 export const getInterviewFeedback = async (transcript: ChatMessage[]): Promise<string> => {
     const feedbackPrompt = `
-        You are an expert career coach providing feedback on a mock interview.
+        You are an expert career coach providing a final summary on a mock interview practice session. The user has already received per-question feedback.
         Here is the transcript of the interview:
-        ${transcript.map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`).join('\n\n')}
+        ${transcript.map(msg => `${msg.role === 'user' ? 'Candidate' : 'Interviewer/Feedback'}: ${msg.content.replace('READY_FOR_NEXT_QUESTION', '')}`).join('\n\n')}
 
-        Please provide constructive feedback for the candidate. The feedback should be encouraging and actionable.
+        Please provide a high-level summary of the candidate's performance based on the entire session.
         Structure your feedback with the following sections:
-        1.  **Overall Summary:** A brief overview of the candidate's performance.
-        2.  **Strengths:** 2-3 bullet points on what the candidate did well.
-        3.  **Areas for Improvement:** 2-3 bullet points on specific areas where the candidate could improve, with suggestions on how to do so.
+        1.  **Overall Summary:** A brief overview of the candidate's performance across all questions.
+        2.  **Key Strengths:** 1-2 bullet points on consistent strengths you observed.
+        3.  **Themes for Improvement:** 1-2 bullet points on recurring patterns or areas for improvement.
 
-        Address the candidate directly (e.g., "You did a great job at...").
+        Keep it concise and encouraging. Address the candidate directly.
     `;
     
     // Fix: Use ai.models.generateContent for non-chat generation.
@@ -71,7 +73,7 @@ export const getInterviewFeedback = async (transcript: ChatMessage[]): Promise<s
         model: "gemini-2.5-flash",
         contents: feedbackPrompt,
         config: {
-          systemInstruction: "You are an expert career coach."
+          systemInstruction: "You are an expert career coach providing a final summary."
         }
     });
 

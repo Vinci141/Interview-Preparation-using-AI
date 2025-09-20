@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -12,7 +11,7 @@ const Button: React.FC<ButtonProps> = ({ children, variant = 'primary', fullWidt
   
   const variantClasses = {
     primary: 'text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
-    secondary: 'text-white bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500',
+    secondary: 'text-slate-800 bg-slate-200 hover:bg-slate-300 dark:text-slate-200 dark:bg-slate-600 dark:hover:bg-slate-700 focus:ring-slate-500',
     tertiary: 'text-white bg-sky-600 hover:bg-sky-700 focus:ring-sky-500',
   };
 

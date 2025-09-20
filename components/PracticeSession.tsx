@@ -8,6 +8,8 @@ import Button from './common/Button';
 import Card from './common/Card';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
+const NEXT_QUESTION_KEYWORD = 'READY_FOR_NEXT_QUESTION';
+
 interface PracticeSessionProps {
   config: PracticeSessionConfig;
   onBack: () => void;
@@ -19,6 +21,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
   const [sessionEnded, setSessionEnded] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isWaitingForNext, setIsWaitingForNext] = useState(false);
 
   const start = useCallback(async () => {
     try {
@@ -42,11 +45,16 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
     const newTranscript = [...transcript, { role: 'user', content: message } as ChatMessage];
     setTranscript(newTranscript);
     setIsLoading(true);
+    setIsWaitingForNext(false);
 
     try {
       const response = await geminiService.sendMessage(message);
       if (response.trim() === 'SESSION_END') {
         handleEndSession(newTranscript);
+      } else if (response.includes(NEXT_QUESTION_KEYWORD)) {
+        const content = response.replace(NEXT_QUESTION_KEYWORD, '').trim();
+        setTranscript(prev => [...prev, { role: 'model', content }]);
+        setIsWaitingForNext(true);
       } else {
         setTranscript(prev => [...prev, { role: 'model', content: response }]);
       }
@@ -57,6 +65,10 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const handleNextQuestion = async () => {
+    await handleSendMessage("I'm ready for the next question.");
   };
 
   const handleEndSession = async (finalTranscript?: ChatMessage[]) => {
@@ -83,7 +95,7 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
 
     } catch (e) {
       console.error(e);
-      setError("Failed to generate feedback for the session.");
+      setError("Failed to generate final feedback for the session.");
     } finally {
       setIsLoading(false);
     }
@@ -93,10 +105,10 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
     return (
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <h1 className="text-3xl font-bold text-center text-slate-800 dark:text-slate-100 mb-8">
-          Interview Feedback
+          Interview Summary
         </h1>
         <Card className="p-6">
-          {isLoading && <LoadingSpinner text="Generating your feedback..." />}
+          {isLoading && <LoadingSpinner text="Generating your final summary..." />}
           {error && <p className="text-red-500 text-center">{error}</p>}
           {feedback && (
             <div className="prose prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
@@ -145,6 +157,8 @@ const PracticeSession: React.FC<PracticeSessionProps> = ({ config, onBack }) => 
         isLoading={isLoading}
         onEndSession={() => handleEndSession()}
         topicName={config.subTopic?.name || config.topic.name}
+        isWaitingForNext={isWaitingForNext}
+        onNextQuestion={handleNextQuestion}
       />
     </div>
   );
