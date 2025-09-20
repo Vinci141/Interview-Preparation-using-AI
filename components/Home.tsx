@@ -1,75 +1,138 @@
-
-import React from 'react';
-import { InterviewType, PreparationCategory } from '../types';
+import React, { useState } from 'react';
+import { InterviewTopic, PracticeSessionConfig, SubTopic } from '../types';
 import Card from './common/Card';
-import Button from './common/Button';
+import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { CodeIcon } from './icons/CodeIcon';
 import { UserGroupIcon } from './icons/UserGroupIcon';
-import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
+import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+
+const interviewTopics: InterviewTopic[] = [
+  {
+    id: 'behavioral',
+    name: 'Behavioral Questions',
+    description: 'Practice answering questions about your past experiences, teamwork, and how you handle workplace situations.',
+    icon: UserGroupIcon,
+    subTopics: [
+      { id: 'leadership', name: 'Leadership & Teamwork', description: 'Questions about leading projects, collaborating with others, and being a team player.' },
+      { id: 'conflict', name: 'Conflict Resolution', description: 'Scenarios involving disagreements with colleagues or managers and how you handled them.' },
+      { id: 'star', name: 'Situational (STAR)', description: 'Practice structuring your answers using the STAR (Situation, Task, Action, Result) method.' },
+    ],
+  },
+  {
+    id: 'technical',
+    name: 'Technical Challenge',
+    description: 'Tackle technical questions, data structures, and algorithms related to your field.',
+    icon: CodeIcon,
+    subTopics: [
+        { id: 'dsa', name: 'Data Structures & Algorithms', description: 'Solve problems related to arrays, strings, linked lists, trees, graphs, and sorting.' },
+        { id: 'system-design', name: 'System Design', description: 'Discuss how to design scalable and reliable systems, like a social media feed or a URL shortener.' },
+        { id: 'databases', name: 'Databases', description: 'Answer questions about SQL, NoSQL, database design, and query optimization.' },
+        { id: 'programming', name: 'Programming Concepts', description: 'Questions on paradigms like OOP, functional programming, and general language-agnostic principles.' },
+        { id: 'os', name: 'Operating Systems', description: 'Explore topics like processes, threads, memory management, and file systems.' },
+        { id: 'networking', name: 'Computer Networking', description: 'Discuss network protocols (TCP/IP), the OSI model, and common web technologies.' },
+    ]
+  },
+  {
+    id: 'general',
+    name: 'General Conversation',
+    description: 'A friendly chat to warm up and practice general communication skills for any type of interview.',
+    icon: ChatBubbleIcon,
+  },
+];
 
 interface HomeProps {
-  selectedType: InterviewType;
-  onSelectType: (type: InterviewType) => void;
-  onStartPractice: (category: PreparationCategory) => void;
-  onStartChat: () => void;
+  onStartSession: (config: PracticeSessionConfig) => void;
 }
 
-const Home: React.FC<HomeProps> = ({ selectedType, onSelectType, onStartPractice, onStartChat }) => {
+const Home: React.FC<HomeProps> = ({ onStartSession }) => {
+  const [selectedTopic, setSelectedTopic] = useState<InterviewTopic | null>(null);
+
+  const handleTopicSelect = (topic: InterviewTopic) => {
+    if (topic.subTopics && topic.subTopics.length > 0) {
+      setSelectedTopic(topic);
+    } else {
+      onStartSession({ topic });
+    }
+  };
+  
+  const handleSubTopicSelect = (subTopic: SubTopic) => {
+    if (selectedTopic) {
+      onStartSession({ topic: selectedTopic, subTopic });
+    }
+  };
+
+  const handleBack = () => {
+    setSelectedTopic(null);
+  };
+
+  if (selectedTopic) {
+    return (
+      <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+        <div className="mb-8">
+            <button onClick={handleBack} className="flex items-center text-base font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                Back to All Topics
+            </button>
+        </div>
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 mb-4">
+            {selectedTopic.name}
+          </h1>
+          <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+            Choose a specific area to focus on.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {selectedTopic.subTopics?.map((subTopic) => (
+            <Card
+              key={subTopic.id}
+              hoverable
+              className="p-6 cursor-pointer flex flex-col"
+              onClick={() => handleSubTopicSelect(subTopic)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubTopicSelect(subTopic)}
+            >
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{subTopic.name}</h2>
+              <p className="text-slate-600 dark:text-slate-400 flex-grow">{subTopic.description}</p>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-10">
-        <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">Welcome to Your Interview Coach</h2>
-        <p className="text-lg text-slate-600">Select your role and how you'd like to prepare.</p>
+    <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+      <div className="text-center mb-12">
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 mb-4">
+          Welcome to Interview Prep AI
+        </h1>
+        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+          Choose a topic to start your mock interview. Our AI will act as your interviewer, helping you sharpen your skills and build confidence.
+        </p>
       </div>
 
-      <Card>
-        <div className="p-6">
-          <label htmlFor="interview-type" className="block text-sm font-medium text-slate-700 mb-2">
-            1. Select Interview Type
-          </label>
-          <select
-            id="interview-type"
-            value={selectedType}
-            onChange={(e) => onSelectType(e.target.value as InterviewType)}
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md shadow-sm"
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {interviewTopics.map((topic) => (
+          <Card 
+            key={topic.id}
+            hoverable
+            className="p-6 cursor-pointer flex flex-col"
+            onClick={() => handleTopicSelect(topic)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && handleTopicSelect(topic)}
           >
-            {Object.values(InterviewType).map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-      </Card>
-
-      <div className="mt-8">
-        <h3 className="text-center text-lg font-medium text-slate-700 mb-6">2. Choose Your Preparation Mode</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Card hoverable={true}>
-            <div className="p-6 text-center flex flex-col items-center">
-              <CodeIcon className="h-12 w-12 text-indigo-500 mb-4"/>
-              <h4 className="text-xl font-semibold text-slate-800 mb-2">Technical Practice</h4>
-              <p className="text-slate-500 mb-6 flex-grow">Hone your skills with targeted technical questions and get instant feedback.</p>
-              <Button onClick={() => onStartPractice(PreparationCategory.Technical)} fullWidth>Start Practice</Button>
+            <div className="flex-shrink-0 mb-4">
+              <div className="inline-flex items-center justify-center h-12 w-12 rounded-lg bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400">
+                <topic.icon className="h-7 w-7" aria-hidden="true" />
+              </div>
             </div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{topic.name}</h2>
+            <p className="text-slate-600 dark:text-slate-400 flex-grow">{topic.description}</p>
           </Card>
-          <Card hoverable={true}>
-            <div className="p-6 text-center flex flex-col items-center">
-              <UserGroupIcon className="h-12 w-12 text-emerald-500 mb-4"/>
-              <h4 className="text-xl font-semibold text-slate-800 mb-2">Behavioral Practice</h4>
-              <p className="text-slate-500 mb-6 flex-grow">Master STAR method questions and perfect your storytelling.</p>
-              <Button onClick={() => onStartPractice(PreparationCategory.Behavioral)} variant="secondary" fullWidth>Start Practice</Button>
-            </div>
-          </Card>
-          <Card hoverable={true}>
-            <div className="p-6 text-center flex flex-col items-center">
-              <ChatBubbleIcon className="h-12 w-12 text-sky-500 mb-4"/>
-              <h4 className="text-xl font-semibold text-slate-800 mb-2">Mock Interview</h4>
-              <p className="text-slate-500 mb-6 flex-grow">Engage in a full-length mock interview with an AI to simulate the real experience.</p>
-              <Button onClick={onStartChat} variant="tertiary" fullWidth>Start Interview</Button>
-            </div>
-          </Card>
-        </div>
+        ))}
       </div>
     </div>
   );

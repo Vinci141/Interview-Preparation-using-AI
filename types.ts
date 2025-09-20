@@ -1,39 +1,34 @@
-export enum InterviewType {
-  SoftwareEngineer = 'Software Engineer',
-  ProductManager = 'Product Manager',
-  UXDesigner = 'UI/UX Designer',
-  DataScientist = 'Data Scientist',
+// Fix: Corrected the React import statement. React is a default export.
+import React from 'react';
+
+export interface InterviewTopic {
+  id: string;
+  name: string;
+  description: string;
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  subTopics?: SubTopic[];
 }
 
-export enum PreparationCategory {
-  Technical = 'Technical',
-  Behavioral = 'Behavioral',
+export interface SubTopic {
+    id: string;
+    name: string;
+    description: string;
 }
 
-export enum View {
-  Home = 'home',
-  Practice = 'practice',
-  Chat = 'chat',
-  History = 'history',
-}
-
-export interface Feedback {
-  positive: string;
-  improvement: string;
-  exampleAnswer: string;
+export interface PracticeSessionConfig {
+  topic: InterviewTopic;
+  subTopic?: SubTopic;
 }
 
 export interface ChatMessage {
-  sender: 'user' | 'ai';
-  text: string;
+  role: 'user' | 'model';
+  content: string;
 }
 
 export interface PracticeSessionRecord {
-  id: number;
-  date: string;
-  interviewType: InterviewType;
-  category: PreparationCategory;
-  question: string;
-  answer: string;
-  feedback: Feedback;
+  id: string;
+  config: PracticeSessionConfig;
+  transcript: ChatMessage[];
+  date: string; // ISO string
+  feedback?: string;
 }

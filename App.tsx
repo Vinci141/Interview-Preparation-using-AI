@@ -1,69 +1,67 @@
-import React, { useState, useCallback } from 'react';
-import { InterviewType, PreparationCategory, View } from './types';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
 import Home from './components/Home';
 import PracticeSession from './components/PracticeSession';
-import MockInterviewChat from './components/MockInterviewChat';
 import History from './components/History';
+import { PracticeSessionConfig } from './types';
+
+type View = 'home' | 'session' | 'history';
 
 const App: React.FC = () => {
-  const [view, setView] = useState<View>(View.Home);
-  const [interviewType, setInterviewType] = useState<InterviewType>(InterviewType.SoftwareEngineer);
-  const [category, setCategory] = useState<PreparationCategory>(PreparationCategory.Technical);
+  const [view, setView] = useState<View>('home');
+  const [sessionConfig, setSessionConfig] = useState<PracticeSessionConfig | null>(null);
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'light');
 
-  const startPractice = useCallback((cat: PreparationCategory) => {
-    setCategory(cat);
-    setView(View.Practice);
-  }, []);
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [theme]);
 
-  const startChat = useCallback(() => {
-    setView(View.Chat);
-  }, []);
+  const toggleTheme = () => {
+    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
+  };
 
-  const goHome = useCallback(() => {
-    setView(View.Home);
-  }, []);
-
-  const goToHistory = useCallback(() => {
-    setView(View.History);
-  }, []);
+  const handleStartSession = (config: PracticeSessionConfig) => {
+    setSessionConfig(config);
+    setView('session');
+  };
+  
+  const handleGoHome = () => {
+    setSessionConfig(null);
+    setView('home');
+  };
 
   const renderContent = () => {
     switch (view) {
-      case View.Practice:
-        return (
-          <PracticeSession
-            interviewType={interviewType}
-            category={category}
-            onBack={goHome}
-          />
-        );
-      case View.Chat:
-        return (
-            <MockInterviewChat 
-                interviewType={interviewType}
-                onBack={goHome} 
-            />
-        );
-      case View.History:
-        return <History onBack={goHome} />;
-      case View.Home:
+      case 'session':
+        if (sessionConfig) {
+          return <PracticeSession config={sessionConfig} onBack={handleGoHome} />;
+        }
+        // Fallback to home if config is missing
+        setView('home');
+        return <Home onStartSession={handleStartSession} />;
+      case 'history':
+        return <History onBack={handleGoHome} />;
+      case 'home':
       default:
-        return (
-          <Home
-            selectedType={interviewType}
-            onSelectType={setInterviewType}
-            onStartPractice={startPractice}
-            onStartChat={startChat}
-          />
-        );
+        return <Home onStartSession={handleStartSession} />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans">
-      <Header onGoHome={goHome} onGoToHistory={goToHistory} />
-      <main className="container mx-auto p-4 md:p-8">
+    <div className="bg-slate-50 dark:bg-slate-900 min-h-screen text-slate-900 dark:text-slate-50 transition-colors duration-300">
+      <Header 
+        onGoHome={handleGoHome}
+        onGoToHistory={() => setView('history')}
+        theme={theme}
+        toggleTheme={toggleTheme}
+      />
+      <main>
         {renderContent()}
       </main>
     </div>

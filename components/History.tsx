@@ -1,100 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import { PracticeSessionRecord } from '../types';
-import { getHistory } from '../services/historyService';
+import * as historyService from '../services/historyService';
 import Card from './common/Card';
+import Button from './common/Button';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 
-const SessionDetails: React.FC<{ session: PracticeSessionRecord; onBack: () => void }> = ({ session, onBack }) => {
-    return (
-        <div>
-            <button onClick={onBack} className="flex items-center space-x-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200 mb-6">
-                <ArrowLeftIcon className="h-5 w-5" />
-                <span>Back to History</span>
-            </button>
-            <Card>
-                <div className="p-6 md:p-8">
-                    <p className="text-sm text-slate-500 mb-4">
-                        {new Date(session.date).toLocaleString()} - {session.interviewType} - {session.category}
-                    </p>
-                    <h3 className="text-xl font-semibold text-slate-800 mb-4">Question:</h3>
-                    <p className="bg-slate-50 p-4 rounded-lg text-slate-700 mb-6">{session.question}</p>
-
-                    <h3 className="text-xl font-semibold text-slate-800 mb-4">Your Answer:</h3>
-                    <p className="bg-slate-50 p-4 rounded-lg text-slate-700 mb-6 whitespace-pre-wrap">{session.answer}</p>
-
-                    <h3 className="text-xl font-semibold text-slate-800 mb-4">Feedback:</h3>
-                    <div className="space-y-6">
-                        <div>
-                            <h4 className="text-lg font-semibold text-emerald-700">What Went Well</h4>
-                            <p className="text-slate-600 mt-1">{session.feedback.positive}</p>
-                        </div>
-                        <div>
-                            <h4 className="text-lg font-semibold text-amber-700">Areas for Improvement</h4>
-                            <p className="text-slate-600 mt-1">{session.feedback.improvement}</p>
-                        </div>
-                        <div>
-                            <h4 className="text-lg font-semibold text-indigo-700">Example Answer</h4>
-                            <p className="text-slate-600 mt-1 whitespace-pre-wrap font-mono bg-slate-100 p-3 rounded-md">{session.feedback.exampleAnswer}</p>
-                        </div>
-                    </div>
-                </div>
-            </Card>
-        </div>
-    );
-};
-
 interface HistoryProps {
-    onBack: () => void;
+  onBack: () => void;
 }
 
 const History: React.FC<HistoryProps> = ({ onBack }) => {
-    const [history, setHistory] = useState<PracticeSessionRecord[]>([]);
-    const [selectedSession, setSelectedSession] = useState<PracticeSessionRecord | null>(null);
+  const [history, setHistory] = useState<PracticeSessionRecord[]>([]);
+  const [selectedSession, setSelectedSession] = useState<PracticeSessionRecord | null>(null);
 
-    useEffect(() => {
-        setHistory(getHistory());
-    }, []);
-
-    if (selectedSession) {
-        return <SessionDetails session={selectedSession} onBack={() => setSelectedSession(null)} />;
-    }
-
+  useEffect(() => {
+    setHistory(historyService.getHistory());
+  }, []);
+  
+  if (selectedSession) {
     return (
-        <div className="max-w-4xl mx-auto">
-            <button onClick={onBack} className="flex items-center space-x-2 text-slate-600 hover:text-indigo-600 transition-colors duration-200 mb-6">
-                <ArrowLeftIcon className="h-5 w-5" />
-                <span>Back to Home</span>
-            </button>
-            <h2 className="text-3xl font-bold text-slate-800 mb-6">Practice History</h2>
-
-            {history.length === 0 ? (
-                <Card>
-                    <div className="p-8 text-center text-slate-500">
-                        <p>You haven't completed any practice sessions yet.</p>
-                        <p>Go back home to start practicing!</p>
-                    </div>
-                </Card>
-            ) : (
-                <div className="space-y-4">
-                    {history.map((session) => (
-                        <Card key={session.id} hoverable={true} className="cursor-pointer" onClick={() => setSelectedSession(session)}>
-                            <div className="p-5 flex justify-between items-center">
-                                <div>
-                                    <p className="font-semibold text-slate-700 truncate md:max-w-xl max-w-xs">{session.question}</p>
-                                    <p className="text-sm text-slate-500 mt-1">
-                                        {new Date(session.date).toLocaleDateString()} - {session.category}
-                                    </p>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400 flex-shrink-0 ml-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            )}
+      <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+        <div className="mb-8">
+            <Button onClick={() => setSelectedSession(null)}>
+                <ArrowLeftIcon className="h-5 w-5 mr-2" />
+                Back to History
+            </Button>
         </div>
+        <h1 className="text-3xl font-bold text-slate-800 dark:text-slate-100 mb-2">
+            Session Details
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mb-6">
+            {new Date(selectedSession.date).toLocaleString()} - {selectedSession.config.topic.name} {selectedSession.config.subTopic ? `(${selectedSession.config.subTopic.name})` : ''}
+        </p>
+
+        <div className="space-y-8">
+          <Card className="p-6">
+            <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Feedback Received</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none whitespace-pre-wrap">
+              {selectedSession.feedback || "No feedback was generated for this session."}
+            </div>
+          </Card>
+          <Card className="p-6">
+             <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-200 mb-4">Transcript</h2>
+             <div className="space-y-4 max-h-96 overflow-y-auto pr-2">
+                {selectedSession.transcript.map((msg, index) => (
+                    <div key={index}>
+                        <p className={`font-bold ${msg.role === 'user' ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-700 dark:text-slate-300'}`}>
+                            {msg.role === 'user' ? 'You' : 'Interviewer'}
+                        </p>
+                        <p className="text-slate-600 dark:text-slate-400 whitespace-pre-wrap">{msg.content}</p>
+                    </div>
+                ))}
+             </div>
+          </Card>
+        </div>
+      </div>
     );
+  }
+
+  return (
+    <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-100">
+          Session History
+        </h1>
+        <Button onClick={onBack}>
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
+          Back to Home
+        </Button>
+      </div>
+
+      {history.length === 0 ? (
+        <Card className="p-8 text-center">
+            <p className="text-slate-600 dark:text-slate-300">You have no past interview sessions.</p>
+        </Card>
+      ) : (
+        <div className="space-y-6">
+          {history.map((session) => (
+            <Card
+              key={session.id}
+              className="p-4 md:p-6 cursor-pointer"
+              hoverable
+              onClick={() => setSelectedSession(session)}
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{session.config.subTopic?.name || session.config.topic.name}</h2>
+                  <p className="text-slate-500 dark:text-slate-400">
+                    {session.config.subTopic && <span className="font-medium">{session.config.topic.name}</span>}
+                    {session.config.subTopic && ' - '}
+                    {new Date(session.date).toLocaleString()}
+                  </p>
+                </div>
+                <div className="mt-4 sm:mt-0">
+                    <span className="text-indigo-600 dark:text-indigo-400 font-medium">View Details &rarr;</span>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default History;
