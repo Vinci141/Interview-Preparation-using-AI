@@ -1,0 +1,5 @@
+{
+  "name": "Interview Prep AI",
+  "description": "An AI-powered application to help users practice for technical and behavioral interviews by generating questions, providing feedback on answers, and conducting mock interviews.",
+  "requestFramePermissions": []
+}
