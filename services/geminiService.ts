@@ -1,4 +1,4 @@
-import { GoogleGenAI, Chat, GenerateContentResponse, Content } from "@google/genai";
+import { GoogleGenAI, Chat, GenerateContentResponse, Content, Type } from "@google/genai";
 import { ChatMessage, PracticeSessionConfig } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -89,4 +89,51 @@ export const getInterviewFeedback = async (transcript: ChatMessage[]): Promise<s
     });
 
     return response.text;
+};
+
+
+export const generatePracticeQuestions = async (config: PracticeSessionConfig): Promise<string[]> => {
+    const { topic, subTopic, difficulty } = config;
+    const topicName = subTopic ? subTopic.name : topic.name;
+
+    const prompt = `You are an expert curriculum developer and interview coach. Your task is to generate a list of 7 high-quality practice interview questions for the following topic:
+
+Topic: ${topicName}
+Broader Category: ${topic.name}
+Difficulty Level: ${difficulty}
+
+The questions should be insightful, relevant to a real-world interview, and tailored to the specified difficulty level. Ensure the questions cover a good range of concepts within the topic.
+
+Return your response as a JSON array of strings, where each string is a single, complete interview question.`;
+
+    const schema = {
+        type: Type.ARRAY,
+        items: {
+            type: Type.STRING,
+            description: "A single interview question."
+        }
+    };
+    
+    try {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+            config: {
+                responseMimeType: "application/json",
+                responseSchema: schema,
+            },
+        });
+        
+        const jsonText = response.text.trim();
+        if (jsonText.startsWith('[') && jsonText.endsWith(']')) {
+            const questions = JSON.parse(jsonText);
+            return Array.isArray(questions) ? questions : [];
+        } else {
+             throw new Error("Received an invalid non-JSON response from the model.");
+        }
+
+    } catch (error) {
+        console.error("Error generating practice questions:", error);
+        throw new Error("Failed to generate practice questions due to an API error or invalid response format.");
+    }
 };

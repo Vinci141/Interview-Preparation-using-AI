@@ -64,6 +64,7 @@ const difficulties: { id: Difficulty; name: string }[] = [
 
 interface HomeProps {
   onStartSession: (config: PracticeSessionConfig) => void;
+  onStartQuestionGeneration: (config: PracticeSessionConfig) => void;
 }
 
 const DifficultySelector: React.FC<{ selected: Difficulty, onChange: (d: Difficulty) => void }> = ({ selected, onChange }) => (
@@ -86,7 +87,7 @@ const DifficultySelector: React.FC<{ selected: Difficulty, onChange: (d: Difficu
 );
 
 
-const Home: React.FC<HomeProps> = ({ onStartSession }) => {
+const Home: React.FC<HomeProps> = ({ onStartSession, onStartQuestionGeneration }) => {
   const [selectedTopic, setSelectedTopic] = useState<InterviewTopic | null>(null);
   const [configuringTopic, setConfiguringTopic] = useState<InterviewTopic | null>(null);
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
@@ -99,9 +100,15 @@ const Home: React.FC<HomeProps> = ({ onStartSession }) => {
     }
   };
   
-  const handleSubTopicSelect = (subTopic: SubTopic) => {
+  const handleStartInterviewClick = (subTopic: SubTopic) => {
     if (selectedTopic) {
       onStartSession({ topic: selectedTopic, subTopic, difficulty });
+    }
+  };
+  
+  const handleGenerateQuestionsClick = (subTopic: SubTopic) => {
+    if (selectedTopic) {
+      onStartQuestionGeneration({ topic: selectedTopic, subTopic, difficulty });
     }
   };
 
@@ -164,15 +171,20 @@ const Home: React.FC<HomeProps> = ({ onStartSession }) => {
           {selectedTopic.subTopics?.map((subTopic) => (
             <Card
               key={subTopic.id}
-              hoverable
-              className="p-6 cursor-pointer flex flex-col"
-              onClick={() => handleSubTopicSelect(subTopic)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && handleSubTopicSelect(subTopic)}
+              className="p-6 flex flex-col justify-between"
             >
-              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{subTopic.name}</h2>
-              <p className="text-slate-600 dark:text-slate-400 flex-grow">{subTopic.description}</p>
+              <div>
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{subTopic.name}</h2>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">{subTopic.description}</p>
+              </div>
+              <div className="flex flex-col sm:flex-row sm:justify-end sm:space-x-2 space-y-2 sm:space-y-0 mt-auto">
+                <Button variant="secondary" onClick={() => handleGenerateQuestionsClick(subTopic)}>
+                  Get Questions
+                </Button>
+                <Button onClick={() => handleStartInterviewClick(subTopic)}>
+                  Start Interview
+                </Button>
+              </div>
             </Card>
           ))}
         </div>

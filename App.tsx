@@ -4,8 +4,9 @@ import Home from './components/Home';
 import PracticeSession from './components/PracticeSession';
 import History from './components/History';
 import { PracticeSessionConfig } from './types';
+import QuestionGenerator from './components/QuestionGenerator';
 
-type View = 'home' | 'session' | 'history';
+type View = 'home' | 'session' | 'history' | 'question-generator';
 
 const App: React.FC = () => {
   const [view, setView] = useState<View>('home');
@@ -30,6 +31,11 @@ const App: React.FC = () => {
     setSessionConfig(config);
     setView('session');
   };
+
+  const handleStartQuestionGeneration = (config: PracticeSessionConfig) => {
+    setSessionConfig(config);
+    setView('question-generator');
+  };
   
   const handleGoHome = () => {
     setSessionConfig(null);
@@ -42,14 +48,19 @@ const App: React.FC = () => {
         if (sessionConfig) {
           return <PracticeSession config={sessionConfig} onBack={handleGoHome} />;
         }
-        // Fallback to home if config is missing
-        setView('home');
-        return <Home onStartSession={handleStartSession} />;
+        setView('home'); // Fallback
+        return <Home onStartSession={handleStartSession} onStartQuestionGeneration={handleStartQuestionGeneration} />;
       case 'history':
         return <History onBack={handleGoHome} />;
+      case 'question-generator':
+        if (sessionConfig) {
+          return <QuestionGenerator config={sessionConfig} onBack={handleGoHome} />;
+        }
+        setView('home'); // Fallback
+        return <Home onStartSession={handleStartSession} onStartQuestionGeneration={handleStartQuestionGeneration} />;
       case 'home':
       default:
-        return <Home onStartSession={handleStartSession} />;
+        return <Home onStartSession={handleStartSession} onStartQuestionGeneration={handleStartQuestionGeneration} />;
     }
   };
 
