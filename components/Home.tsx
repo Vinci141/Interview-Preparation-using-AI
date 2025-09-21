@@ -8,6 +8,7 @@ import { UserGroupIcon } from './icons/UserGroupIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { AiIcon } from './icons/AiIcon';
 import { FinanceIcon } from './icons/FinanceIcon';
+import { PythonIcon } from './icons/PythonIcon';
 
 const interviewTopics: InterviewTopic[] = [
   {
@@ -33,6 +34,19 @@ const interviewTopics: InterviewTopic[] = [
         { id: 'programming', name: 'Programming Concepts', description: 'Questions on paradigms like OOP, functional programming, and general language-agnostic principles.' },
         { id: 'os', name: 'Operating Systems', description: 'Explore topics like processes, threads, memory management, and file systems.' },
         { id: 'networking', name: 'Computer Networking', description: 'Discuss network protocols (TCP/IP), the OSI model, and common web technologies.' },
+    ]
+  },
+  {
+    id: 'python',
+    name: 'Python Programming',
+    description: 'Practice Python-specific questions, covering everything from language fundamentals to advanced concepts.',
+    icon: PythonIcon,
+    subTopics: [
+      { id: 'python-fundamentals', name: 'Python Fundamentals', description: 'Core syntax, data types (strings, lists, dicts), control flow, and functions.' },
+      { id: 'python-oop', name: 'Object-Oriented Python', description: 'Classes, objects, inheritance, polymorphism, and special methods (dunder methods).' },
+      { id: 'python-advanced', name: 'Advanced Concepts', description: 'Decorators, generators, context managers, and concurrency concepts in Python.' },
+      { id: 'python-stdlib', name: 'Standard Library', description: 'Commonly used modules like collections, itertools, os, and their practical applications.' },
+      { id: 'python-ds', name: 'Data Structures', description: 'In-depth questions on lists, tuples, dictionaries, sets, and their time complexity.' },
     ]
   },
   {
