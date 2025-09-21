@@ -5,6 +5,7 @@ import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { CodeIcon } from './icons/CodeIcon';
 import { UserGroupIcon } from './icons/UserGroupIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
+import { AiIcon } from './icons/AiIcon';
 
 const interviewTopics: InterviewTopic[] = [
   {
@@ -30,6 +31,19 @@ const interviewTopics: InterviewTopic[] = [
         { id: 'programming', name: 'Programming Concepts', description: 'Questions on paradigms like OOP, functional programming, and general language-agnostic principles.' },
         { id: 'os', name: 'Operating Systems', description: 'Explore topics like processes, threads, memory management, and file systems.' },
         { id: 'networking', name: 'Computer Networking', description: 'Discuss network protocols (TCP/IP), the OSI model, and common web technologies.' },
+    ]
+  },
+  {
+    id: 'ai-ml',
+    name: 'AI / Machine Learning',
+    description: 'Prepare for AI/ML roles, from foundational concepts to advanced model architecture and system design.',
+    icon: AiIcon,
+    subTopics: [
+        { id: 'ml-fundamentals', name: 'AI/ML Fundamentals', description: 'Core concepts like supervised/unsupervised learning, evaluation metrics, and classic algorithms (e.g., decision trees, SVMs).' },
+        { id: 'math-stats', name: 'Math & Statistics', description: 'Questions on probability, linear algebra, and calculus concepts that form the bedrock of machine learning.' },
+        { id: 'deep-learning', name: 'Deep Learning', description: 'Dive into neural networks, activation functions, backpropagation, and architectures like CNNs, RNNs, and Transformers.' },
+        { id: 'nlp-cv', name: 'NLP & Computer Vision', description: 'Specialized questions on topics like text processing, embeddings, object detection, and image segmentation.' },
+        { id: 'ml-system-design', name: 'ML System Design', description: 'Design end-to-end machine learning systems, from data ingestion and feature engineering to deployment and monitoring (MLOps).' },
     ]
   },
   {
