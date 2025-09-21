@@ -7,6 +7,7 @@ import { CodeIcon } from './icons/CodeIcon';
 import { UserGroupIcon } from './icons/UserGroupIcon';
 import { ArrowLeftIcon } from './icons/ArrowLeftIcon';
 import { AiIcon } from './icons/AiIcon';
+import { FinanceIcon } from './icons/FinanceIcon';
 
 const interviewTopics: InterviewTopic[] = [
   {
@@ -45,6 +46,19 @@ const interviewTopics: InterviewTopic[] = [
         { id: 'deep-learning', name: 'Deep Learning', description: 'Dive into neural networks, activation functions, backpropagation, and architectures like CNNs, RNNs, and Transformers.' },
         { id: 'nlp-cv', name: 'NLP & Computer Vision', description: 'Specialized questions on topics like text processing, embeddings, object detection, and image segmentation.' },
         { id: 'ml-system-design', name: 'ML System Design', description: 'Design end-to-end machine learning systems, from data ingestion and feature engineering to deployment and monitoring (MLOps).' },
+    ]
+  },
+  {
+    id: 'finance-tax',
+    name: 'Finance & Tax (for CAs)',
+    description: 'Practice for Chartered Accountant roles with questions on accounting, auditing, taxation, and financial management.',
+    icon: FinanceIcon,
+    subTopics: [
+      { id: 'accounting-standards', name: 'Accounting Standards', description: 'Questions on Ind AS, IFRS, convergence, and practical application of accounting principles.' },
+      { id: 'auditing', name: 'Auditing & Assurance', description: 'Covers audit planning, risk assessment, professional ethics, and standards on auditing (SAs).' },
+      { id: 'direct-tax', name: 'Direct Taxation', description: 'Deep dive into income tax laws, corporate tax, capital gains, TDS, and international taxation.' },
+      { id: 'indirect-tax', name: 'Indirect Taxation (GST)', description: 'Explore concepts of GST, input tax credit (ITC), reverse charge mechanism, and compliance.' },
+      { id: 'financial-management', name: 'Financial Management', description: 'Tackle topics like capital budgeting, cost of capital, working capital, and business valuation.' },
     ]
   },
   {
