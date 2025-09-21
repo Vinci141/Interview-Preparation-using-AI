@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { InterviewTopic, PracticeSessionConfig, SubTopic } from '../types';
+import { InterviewTopic, PracticeSessionConfig, SubTopic, Difficulty } from '../types';
 import Card from './common/Card';
+import Button from './common/Button';
 import { ChatBubbleIcon } from './icons/ChatBubbleIcon';
 import { CodeIcon } from './icons/CodeIcon';
 import { UserGroupIcon } from './icons/UserGroupIcon';
@@ -54,48 +55,111 @@ const interviewTopics: InterviewTopic[] = [
   },
 ];
 
+const difficulties: { id: Difficulty; name: string }[] = [
+  { id: 'easy', name: 'Easy' },
+  { id: 'medium', name: 'Medium' },
+  { id: 'hard', name: 'Hard' },
+];
+
+
 interface HomeProps {
   onStartSession: (config: PracticeSessionConfig) => void;
 }
 
+const DifficultySelector: React.FC<{ selected: Difficulty, onChange: (d: Difficulty) => void }> = ({ selected, onChange }) => (
+  <div className="flex justify-center space-x-2 rounded-lg bg-slate-200 dark:bg-slate-700 p-1 my-8">
+    {difficulties.map((d) => (
+      <button
+        key={d.id}
+        onClick={() => onChange(d.id)}
+        className={`px-6 py-2 text-sm font-medium rounded-md transition-colors w-24 ${
+          selected === d.id
+            ? 'bg-white dark:bg-slate-900 text-indigo-600 shadow'
+            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-300/60 dark:hover:bg-slate-600/60'
+        }`}
+        aria-pressed={selected === d.id}
+      >
+        {d.name}
+      </button>
+    ))}
+  </div>
+);
+
+
 const Home: React.FC<HomeProps> = ({ onStartSession }) => {
   const [selectedTopic, setSelectedTopic] = useState<InterviewTopic | null>(null);
+  const [configuringTopic, setConfiguringTopic] = useState<InterviewTopic | null>(null);
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
 
   const handleTopicSelect = (topic: InterviewTopic) => {
     if (topic.subTopics && topic.subTopics.length > 0) {
       setSelectedTopic(topic);
     } else {
-      onStartSession({ topic });
+      setConfiguringTopic(topic);
     }
   };
   
   const handleSubTopicSelect = (subTopic: SubTopic) => {
     if (selectedTopic) {
-      onStartSession({ topic: selectedTopic, subTopic });
+      onStartSession({ topic: selectedTopic, subTopic, difficulty });
+    }
+  };
+
+  const handleStartConfiguredSession = () => {
+    if (configuringTopic) {
+      onStartSession({ topic: configuringTopic, difficulty });
     }
   };
 
   const handleBack = () => {
     setSelectedTopic(null);
+    setConfiguringTopic(null);
   };
+
+  if (configuringTopic) {
+    return (
+      <div className="container mx-auto px-4 py-8 md:px-8 md:py-12 text-center">
+        <div className="mb-8 text-left">
+          <button onClick={handleBack} className="flex items-center text-base font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+            Back to All Topics
+          </button>
+        </div>
+        <div className="inline-flex items-center justify-center h-16 w-16 rounded-lg bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-400 mb-6">
+          <configuringTopic.icon className="h-9 w-9" aria-hidden="true" />
+        </div>
+        <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 mb-4">
+          {configuringTopic.name}
+        </h1>
+        <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
+          {configuringTopic.description}
+        </p>
+        <DifficultySelector selected={difficulty} onChange={setDifficulty} />
+        <Button onClick={handleStartConfiguredSession}>
+          Start Session
+        </Button>
+      </div>
+    );
+  }
 
   if (selectedTopic) {
     return (
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <div className="mb-8">
-            <button onClick={handleBack} className="flex items-center text-base font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
-                <ArrowLeftIcon className="h-5 w-5 mr-2" />
-                Back to All Topics
-            </button>
+          <button onClick={handleBack} className="flex items-center text-base font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+            <ArrowLeftIcon className="h-5 w-5 mr-2" />
+            Back to All Topics
+          </button>
         </div>
-        <div className="text-center mb-12">
+        <div className="text-center mb-2">
           <h1 className="text-4xl md:text-5xl font-extrabold text-slate-800 dark:text-slate-100 mb-4">
             {selectedTopic.name}
           </h1>
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-300 max-w-3xl mx-auto">
-            Choose a specific area to focus on.
+            First, choose a difficulty. Then, select a specific area to focus on.
           </p>
         </div>
+        <DifficultySelector selected={difficulty} onChange={setDifficulty} />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {selectedTopic.subTopics?.map((subTopic) => (
             <Card

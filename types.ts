@@ -1,4 +1,3 @@
-// Fix: Corrected the React import statement. React is a default export.
 import React from 'react';
 
 export interface InterviewTopic {
@@ -15,9 +14,12 @@ export interface SubTopic {
     description: string;
 }
 
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
 export interface PracticeSessionConfig {
   topic: InterviewTopic;
   subTopic?: SubTopic;
+  difficulty: Difficulty;
 }
 
 export interface ChatMessage {

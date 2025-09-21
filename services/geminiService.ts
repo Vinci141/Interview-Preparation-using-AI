@@ -1,22 +1,37 @@
 import { GoogleGenAI, Chat, GenerateContentResponse, Content } from "@google/genai";
 import { ChatMessage, PracticeSessionConfig } from '../types';
 
-// Fix: Initialize GoogleGenAI with named apiKey parameter as per guidelines.
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
 let chat: Chat | null = null;
 
-// Fix: The function was returning a string, which did not match the 'Content' return type.
-// It now returns a valid Content object to satisfy the type signature.
 const createSystemInstruction = (config: PracticeSessionConfig): Content => {
-    const topicName = config.subTopic ? config.subTopic.name : config.topic.name;
-    const topicDescription = config.subTopic ? config.subTopic.description : config.topic.description;
+    const { topic, subTopic, difficulty } = config;
+    const topicName = subTopic ? subTopic.name : topic.name;
+    const topicDescription = subTopic ? subTopic.description : topic.description;
+
+    let difficultyInstruction = '';
+    switch (difficulty) {
+        case 'easy':
+            difficultyInstruction = `The difficulty level for this interview is EASY. Ask foundational, straightforward questions. The expected answers are concise and test basic knowledge. Avoid multi-part questions or complex scenarios.`;
+            break;
+        case 'hard':
+            difficultyInstruction = `The difficulty level for this interview is HARD. Ask challenging, in-depth questions that may involve multiple parts, edge cases, or complex scenarios. Expect detailed, well-structured answers that demonstrate deep expertise.`;
+            break;
+        case 'medium':
+        default:
+            difficultyInstruction = `The difficulty level for this interview is MEDIUM. Ask standard interview questions that cover common scenarios and require a solid understanding of the topic.`;
+            break;
+    }
 
     const instructionText = `You are an expert interviewer conducting a practice session. Your goal is to help the candidate by providing immediate, question-by-question feedback.
 
 The interview topic is: ${topicName}.
-The broader category is: ${config.topic.name}.
+The broader category is: ${topic.name}.
 Your description for the topic is: "${topicDescription}".
+
+**Difficulty Level:**
+${difficultyInstruction}
 
 **Interaction Flow:**
 1.  Start by greeting the candidate and asking the first question. Ask only one question at a time.
@@ -32,16 +47,13 @@ Your description for the topic is: "${topicDescription}".
 
 export const startInterview = async (config: PracticeSessionConfig): Promise<string> => {
     chat = ai.chats.create({
-        // Fix: Use 'gemini-2.5-flash' model.
         model: 'gemini-2.5-flash',
         config: {
             systemInstruction: createSystemInstruction(config),
         },
     });
 
-    // Fix: Use chat.sendMessage to interact with the chat session.
     const response: GenerateContentResponse = await chat.sendMessage({ message: "Hello, I'm ready to start the interview." });
-    // Fix: Access response text directly via the .text property.
     return response.text;
 };
 
@@ -68,7 +80,6 @@ export const getInterviewFeedback = async (transcript: ChatMessage[]): Promise<s
         Keep it concise and encouraging. Address the candidate directly.
     `;
     
-    // Fix: Use ai.models.generateContent for non-chat generation.
     const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: feedbackPrompt,
